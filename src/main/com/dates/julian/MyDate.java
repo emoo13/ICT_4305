@@ -11,12 +11,28 @@ public class MyDate {
     public MyDate() {
         this.julianNumber = toJulianNumber(1, 1, 1970);
     }
+
     /* Creates a new MyDate from an existing MyDate */
     public MyDate( MyDate date){
+        if (date == null) {
+            throw new NullPointerException("MyDate is null");
+        }
         this.julianNumber = date.julianNumber;
     }
+
     /* Creates a new MyDate from a day, month, and year */
     public MyDate( int day, int month, int year){
+        // Validate they are appropriate day/month values
+        if (month < 1 || month > 12){
+            throw new IllegalArgumentException("Invalid month, please enter a number between 1 and 12.");
+        }
+
+        int last = getLastDayOfMonth(month, year);
+        if (day < 1 || day > last) {
+            throw new IllegalArgumentException(
+                    "Invalid day passed for the date: " + month + "/" + day + "/" + year + ". Please input a valid day!");
+        }
+
         this.julianNumber = toJulianNumber(day, month, year);
     }
 
@@ -60,10 +76,21 @@ public class MyDate {
         JulianDateConvertor julian = new JulianDateConvertor(julianNumber);
         String dateString = julian.convertJulianToDate();
         String[] splitDateString = dateString.split("-");
-        return new int[] {
-                Integer.parseInt(splitDateString[0]),
-                Integer.parseInt(splitDateString[1]),
-                Integer.parseInt(splitDateString[2])
-        };
+
+        // Expected to contain date, month and year, length of 3
+        if (splitDateString.length != 3) {
+            throw new IllegalStateException("Failed to gather month, day, and year from: " + dateString);
+        }
+
+        try {
+            return new int[]{
+                    Integer.parseInt(splitDateString[0]),
+                    Integer.parseInt(splitDateString[1]),
+                    Integer.parseInt(splitDateString[2])
+            };
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Failed to parse the split array for dates: " + dateString, e);
+        }
+
     }
 }

@@ -1,11 +1,10 @@
 package com.dates.julian;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This is the test class for testing MyDate.java class.
@@ -45,5 +44,17 @@ class MyDateTest {
     @Test
     void testMyDateLeapYear() {
         assertFalse(MyDate.isLeapYear(2025));
+    }
+
+    @Test void testInvalidDayMonthRel() {
+        assertThrows(IllegalArgumentException.class, () -> new MyDate(31, 9, 2025));
+    }
+
+    @Test void testInvalidMonth() {
+        assertThrows(IllegalArgumentException.class, () -> new MyDate(31, 13, 2025));
+    }
+
+    @Test void testInvalidNullDate() {
+        assertThrows(NullPointerException.class, () -> new MyDate(null));
     }
 }
