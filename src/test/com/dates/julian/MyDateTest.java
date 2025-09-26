@@ -25,6 +25,13 @@ class MyDateTest {
     }
 
     @Test
+    void testMyDateConstructor(){
+        MyDate arbitraryDate = new MyDate(5, 4, 2005);
+        MyDate myDate = new MyDate(arbitraryDate);
+        assertEquals(2005, arbitraryDate.getYear());
+    }
+
+    @Test
     void testMyDateGettersSet() {
         LocalDateTime now = LocalDateTime.now();
         int year = now.getYear();
