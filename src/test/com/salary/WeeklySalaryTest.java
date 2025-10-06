@@ -1,4 +1,4 @@
-package com.dates.julian;
+package com.salary;
 
 import org.junit.jupiter.api.Test;
 

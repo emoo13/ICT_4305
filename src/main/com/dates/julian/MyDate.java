@@ -13,7 +13,7 @@ public class MyDate {
     }
 
     /* Creates a new MyDate from an existing MyDate */
-    public MyDate( MyDate date){
+    public MyDate(MyDate date){
         if (date == null) {
             throw new NullPointerException("MyDate is null");
         }

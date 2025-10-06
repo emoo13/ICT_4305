@@ -1,4 +1,4 @@
-package com.dates.julian;
+package com.salary;
 
 public class Manager extends Employee {
     public Manager(String name, double salary)
