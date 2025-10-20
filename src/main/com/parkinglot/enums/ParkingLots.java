@@ -74,10 +74,5 @@ public enum ParkingLots {
         return lotId;
     }
 
-    public double getLotPrice() {
-        return (chargingMode == ChargingMode.ENTRY_EXIT)
-                ? hourlyCents / 100.0   // hourly rate for EXIT/ENTRY lots
-                : entryFeeCents / 100.0; // entry fee for ENTRY_ONLY lots
-    }
 }
 

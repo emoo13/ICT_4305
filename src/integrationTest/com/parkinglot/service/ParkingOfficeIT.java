@@ -56,7 +56,6 @@ public class ParkingOfficeIT {
         assertEquals(CarType.SUV, customerCarData.getCarType());
         assertEquals(5, customerCarData.getPermitExpiration().atZone(ZoneOffset.UTC).toLocalDate().getMonthValue());
         assertEquals(31, customerCarData.getPermitExpiration().atZone(ZoneOffset.UTC).toLocalDate().getDayOfMonth());
-
     }
 
     @Test

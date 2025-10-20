@@ -3,7 +3,6 @@ package com.parkinglot.core;
 import com.parkinglot.utils.ParkingCharge;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 

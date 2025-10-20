@@ -1,7 +1,7 @@
 package com.parkinglot.core;
 
 public class Money {
-    private long cents;
+    private final long cents;
 
     public Money(long cents) {
         this.cents = cents;

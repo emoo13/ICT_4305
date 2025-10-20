@@ -44,26 +44,6 @@ public class ParkingOffice {
         return carRegistryData;
     }
 
-    public void processParkingLotEntry(Car car, String lotId) {
-        Instant entryTime = Instant.now();
-        ParkingLot lotData = retrieveLotData(lotId);
-        ParkingCharge entryCharge = lotData.entry(entryTime, car);
-
-        if (entryCharge.getAmount().getCents() != 0) {
-            addCharge(entryCharge); // record non-zero entry fees
-        }
-    }
-
-    public void processParkingLotExit(Car car, String lotId) {
-        Instant exitTime = Instant.now();
-        ParkingLot lotData = retrieveLotData(lotId);
-        ParkingCharge exitCharge = lotData.exit(exitTime, car);
-
-        if (exitCharge.getAmount().getCents() != 0) {
-            addCharge(exitCharge);
-        }
-    }
-
     // Getters
     public String getName() {
         return name;
