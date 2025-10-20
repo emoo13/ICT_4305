@@ -1,8 +1,10 @@
-package com.dates.julian;
+package java.com.dates.julian;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import java.com.dates.julian.JulianDateConvertor;
 
 /**
  *This is the test class for testing JulianDateConvertor.java class. 

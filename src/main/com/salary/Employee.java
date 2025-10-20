@@ -1,4 +1,4 @@
-package com.salary;
+package java.com.salary;
 
 public class Employee {
     private final String name;

@@ -1,4 +1,4 @@
-package com.dates.julian;
+package java.com.dates.julian;
 
 /**
  * This class set the date and convert that date into Julian number and vice versa. 

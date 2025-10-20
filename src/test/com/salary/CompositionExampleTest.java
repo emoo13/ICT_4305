@@ -1,6 +1,8 @@
-package com.salary;
+package java.com.salary;
 
 import org.junit.jupiter.api.Test;
+
+import java.com.salary.Employee;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

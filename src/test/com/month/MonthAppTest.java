@@ -1,6 +1,8 @@
-package com.month;
+package java.com.month;
 
 import org.junit.jupiter.api.Test;
+
+import java.com.month.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
