@@ -1,4 +1,4 @@
-package com.salary;
+package java.com.salary;
 
 public class Manager extends Employee {
     public Manager(String name, double salary)

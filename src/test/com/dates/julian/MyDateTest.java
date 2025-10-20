@@ -1,7 +1,8 @@
-package com.dates.julian;
+package java.com.dates.julian;
 
 import org.junit.jupiter.api.Test;
 
+import java.com.dates.julian.MyDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
