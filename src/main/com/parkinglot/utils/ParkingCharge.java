@@ -9,6 +9,7 @@ import com.parkinglot.enums.ParkingLots;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Objects;
 
 public class ParkingCharge {
     private final String permitId;
@@ -79,6 +80,26 @@ public class ParkingCharge {
         return new ParkingCharge(permitId, lotId, checkoutTime, new Money(totalAfterOvernight));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ParkingCharge that)) {
+            return false;
+        }
+
+        return Objects.equals(this.getPermitId(), that.getPermitId())
+                && Objects.equals(this.getLotId(), that.getLotId())
+                && Objects.equals(this.getAmount(), that.getAmount());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPermitId(), getLotId(), getAmount());
+    }
+
+    @Override
     public String toString() {
         return permitId + " " + lotId + " " + incurred + " " + amount;
     }

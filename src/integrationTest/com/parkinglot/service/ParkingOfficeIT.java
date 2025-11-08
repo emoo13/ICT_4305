@@ -9,15 +9,17 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParkingOfficeIT {
     private ParkingOffice officeData;
     private Address officeAddress;
     private Car customerCarData;
+    private Car customerCarData2;
+    private Car alreadyExistsCustomerCarData;
     private Address customerAddress;
     private Customer customer;
 
@@ -33,7 +35,13 @@ public class ParkingOfficeIT {
         customer = officeData.register("Jane Smith", customerAddress, "098-765-4321");
 
         Car customerCar = new Car("DEN-UNI2", CarType.SUV, customer);
-        customerCarData = officeData.register(customer, "PLN-2", customerCar.getLicense(),
+        customerCarData = officeData.register(customer, "PLN-1", customerCar.getLicense(),
+                customerCar.getCarType(), PermitDurations.YEARLY);
+
+        customerCarData2 = officeData.register(customer, "PLS-1", customerCar.getLicense(),
+                customerCar.getCarType(), PermitDurations.YEARLY);
+
+        alreadyExistsCustomerCarData = officeData.register(customer, "PLS-1", customerCar.getLicense(),
                 customerCar.getCarType(), PermitDurations.YEARLY);
 
     }
@@ -49,13 +57,41 @@ public class ParkingOfficeIT {
 
     @Test
     void testRegisterCar() {
-        assertTrue(customerCarData.getPermit().contains("janesmith"));
+        assertSame(customerCarData, customerCarData2);
+        assertSame(customerCarData, alreadyExistsCustomerCarData);
+        assertEquals(1, officeData.getCars().size());
+
+        // the car has permits for both lots
+        assertTrue(customerCarData.hasPermitForLot("PLN-1"));
+        assertTrue(customerCarData.hasPermitForLot("PLS-1"));
+
         assertEquals("DEN-UNI2", customerCarData.getLicense());
-        assertEquals("PLN-2", customerCarData.getPermitLot());
         assertEquals("Jane Smith", customerCarData.getOwner().getCustomerName());
         assertEquals(CarType.SUV, customerCarData.getCarType());
-        assertEquals(5, customerCarData.getPermitExpiration().atZone(ZoneOffset.UTC).toLocalDate().getMonthValue());
-        assertEquals(31, customerCarData.getPermitExpiration().atZone(ZoneOffset.UTC).toLocalDate().getDayOfMonth());
+
+        var pln1 = customerCarData.getPermitForLot("PLN-1");
+        assertNotNull(pln1);
+        assertTrue(pln1.permitId().contains("janesmith"));
+        assertEquals("PLN-1", pln1.lotId());
+        assertEquals(5,  pln1.expiration().atZone(ZoneOffset.UTC).toLocalDate().getMonthValue());
+        assertEquals(31, pln1.expiration().atZone(ZoneOffset.UTC).toLocalDate().getDayOfMonth());
+
+        var pls1 = customerCarData.getPermitForLot("PLS-1");
+        assertNotNull(pls1);
+        assertTrue(pls1.permitId().contains("janesmith"));
+        assertEquals("PLS-1", pls1.lotId());
+        assertEquals(5,  pls1.expiration().atZone(ZoneOffset.UTC).toLocalDate().getMonthValue());
+        assertEquals(31, pls1.expiration().atZone(ZoneOffset.UTC).toLocalDate().getDayOfMonth());
+
+        customerCarData.setCurrentLot("PLN-1");
+        assertEquals("PLN-1", customerCarData.getPermitLot());
+        assertEquals(pln1.permitId(), customerCarData.getPermit());
+        assertEquals(pln1.expiration(), customerCarData.getPermitExpiration());
+
+        customerCarData.setCurrentLot("PLS-1");
+        assertEquals("PLS-1", customerCarData.getPermitLot());
+        assertEquals(pls1.permitId(), customerCarData.getPermit());
+        assertEquals(pls1.expiration(), customerCarData.getPermitExpiration());
     }
 
     @Test
@@ -83,5 +119,39 @@ public class ParkingOfficeIT {
         ParkingCharge ch = new ParkingCharge("P1Test","PLN-1", Instant.EPOCH, new Money(1200));
         Money amount = officeData.addCharge(ch);
         assertEquals(12.00, amount.getDollars());
+        assertEquals(1, officeData.getParkingCharges().size());
+    }
+
+    @Test
+    void testGetPermitIds() {
+        Collection<String> permitIds = officeData.getPermitIds();
+        assertEquals(2, permitIds.size());
+    }
+
+    @Test
+    void testGetPermitIdsForCustomer() {
+        Collection<String> permitIds = officeData.getPermitIds(customer);
+        assertEquals(2, permitIds.size());
+    }
+
+    @Test
+    void testGetCustomerIds() {
+        Collection<String> customerIds = officeData.getCustomerIds();
+        assertEquals(1, customerIds.size());
+    }
+
+    @Test
+    void testLotData() {
+        ParkingLot lot = officeData.retrieveLotData("PLN-1");
+        assertEquals("PLN-1", lot.getLotId());
+        assertEquals(150, lot.getLotCapacity());
+    }
+
+    @Test
+    void testInvalidLotData() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> officeData.retrieveLotData("DOESNTEXIST11")
+        );
     }
 }

@@ -5,6 +5,7 @@ import com.parkinglot.utils.ParkingCharge;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ParkingLot {
     private final String lotId;
@@ -27,6 +28,10 @@ public class ParkingLot {
 
     public String getLotId() {
         return lotId;
+    }
+
+    public int getLotCapacity() {
+        return capacity;
     }
 
     /**
@@ -73,6 +78,24 @@ public class ParkingLot {
         if (car.getPermitExpiration() == null || car.getPermitExpiration().isBefore(Instant.now())) {
             throw new IllegalArgumentException("Car Permit has expired!\nExpired: " + car.getPermitExpiration() + "\n Please re-register your car!");
         }
+    }
+
+    @Override
+    public boolean equals(Object refLotId) {
+        if (this == refLotId) {
+            return true;
+        }
+
+        if (!(refLotId instanceof ParkingLot that)) {
+            return false;
+        }
+
+        return Objects.equals(this.getLotId(), that.getLotId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLotId());
     }
 
     @Override

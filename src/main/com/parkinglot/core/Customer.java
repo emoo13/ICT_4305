@@ -1,5 +1,7 @@
 package com.parkinglot.core;
 
+import java.util.Objects;
+
 public class Customer {
     private final String customerId;
     private final String name;
@@ -25,6 +27,24 @@ public class Customer {
     }
     public String getCustomerPhoneNumber() {
         return phoneNumber;
+    }
+
+    @Override
+    public boolean equals(Object customerId) {
+        if (this == customerId) {
+            return true;
+        }
+
+        if (!(customerId instanceof Customer that)) {
+            return false;
+        }
+
+        return Objects.equals(this.getCustomerId(), that.customerId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customerId);
     }
 
     @Override

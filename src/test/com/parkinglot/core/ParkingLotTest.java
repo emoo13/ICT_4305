@@ -26,8 +26,8 @@ public class ParkingLotTest {
         Customer owner = new Customer("C-1", "Alice",
                 new Address("x", "", "Denver", "CO", "80210"), "555-0000");
         car = new Car("ABC123", CarType.SUV, owner);
-        car.setPermit("PERMIT-1");
-        car.setPermitExpiration(Instant.now().plus(30, ChronoUnit.DAYS));
+        car.updatePermit("PLN-1", "PERMIT-1", Instant.now().plus(30, ChronoUnit.DAYS));
+        car.setCurrentLot("PLN-1");
     }
 
     @Test

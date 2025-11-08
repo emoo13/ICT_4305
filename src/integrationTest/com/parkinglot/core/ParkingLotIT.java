@@ -58,15 +58,17 @@ public class ParkingLotIT {
                 "", "Denver", "Colorado", "80210");
         Customer customer2 = officeData.register("Jane Smith", customerAddress2, "098-765-4321");
         customer2Car1 = new Car("DEN-UNI2", CarType.SUV, customer2);
-        customer2Car1Data = officeData.register(customer2, "PLN-2", customer2Car1.getLicense(),
+        customer2Car1Data = officeData.register(customer2, "PLS-1", customer2Car1.getLicense(),
                 customer2Car1.getCarType(), PermitDurations.YEARLY);
 
     }
 
     @Test
     void testExpiredPermit() {
-        customer2Car1.setPermitExpiration(Instant.now().minus(1, ChronoUnit.HOURS));
-        assertThrows(IllegalArgumentException.class, () -> parkingLotNorth.entry(Instant.now(), customer2Car1));
+        String permitId = customer2Car1Data.getPermitForLot("PLS-1").permitId();
+        customer2Car1Data.updatePermit("PLS-1", permitId, Instant.now().minus(1, ChronoUnit.HOURS));
+        customer2Car1Data.setCurrentLot("PLS-1");
+        assertThrows(IllegalArgumentException.class, () -> parkingLotNorth.entry(Instant.now(), customer2Car1Data));
     }
 
     /*
