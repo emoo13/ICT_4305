@@ -1,14 +1,10 @@
-package com.parkinglot.utils;
+package com.parkinglot.core;
 
-import com.parkinglot.core.Car;
-import com.parkinglot.core.Money;
 import com.parkinglot.enums.CarType;
 import com.parkinglot.enums.ChargingMode;
 import com.parkinglot.enums.ParkingLots;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Objects;
 
 public class ParkingCharge {
@@ -65,13 +61,21 @@ public class ParkingCharge {
 
         } else {
             Money overnightFee = parkingLot.getOvernightFee();
-            // If fixed lot, only charge on entry, then overnight
-            int overnightParked = Math.toIntExact(
-                    java.time.temporal.ChronoUnit.DAYS.between(
-                            incurred.atZone(ZoneOffset.UTC).toLocalDate(),
-                            checkoutTime.atZone(ZoneOffset.UTC).toLocalDate()
-                    )
+            // If fixed lot, only charge on entry, then overnight starting at 2AM
+            LocalDateTime incurredDT  = incurred.atZone(ZoneOffset.UTC).toLocalDateTime();
+            LocalDateTime checkoutDT  = checkoutTime.atZone(ZoneOffset.UTC).toLocalDateTime();
+
+            long nights = java.time.temporal.ChronoUnit.DAYS.between(
+                    incurredDT.toLocalDate(),
+                    checkoutDT.toLocalDate()
             );
+
+            LocalTime cutoff = LocalTime.of(2, 0);
+            if (checkoutDT.toLocalTime().isBefore(cutoff)) {
+                nights = Math.max(0, nights - 1);
+            }
+
+            int overnightParked = Math.toIntExact(nights);
 
             totalAfterOvernight = calculateDiscount(car,overnightParked * overnightFee.getCents());
 

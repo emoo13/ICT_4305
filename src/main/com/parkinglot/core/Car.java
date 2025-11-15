@@ -32,7 +32,6 @@ public class Car {
     }
 
     // Setters
-
     public void setCurrentLot(String currentLotId) {
         this.currentLotId = currentLotId;
     }
@@ -60,7 +59,6 @@ public class Car {
     public Collection<String> getAllPermitIds() {
         return permits.values().stream().map(Permit::permitId).toList();
     }
-
 
     // Getters
     public String getLicense() {

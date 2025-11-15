@@ -1,7 +1,5 @@
 package com.parkinglot.core;
 
-import com.parkinglot.utils.ParkingCharge;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;

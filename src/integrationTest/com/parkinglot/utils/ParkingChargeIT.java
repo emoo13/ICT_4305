@@ -3,6 +3,7 @@ package com.parkinglot.utils;
 import com.parkinglot.core.Address;
 import com.parkinglot.core.Car;
 import com.parkinglot.core.Customer;
+import com.parkinglot.core.ParkingCharge;
 import com.parkinglot.enums.CarType;
 import com.parkinglot.service.ParkingOffice;
 import org.junit.jupiter.api.BeforeEach;
