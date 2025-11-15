@@ -4,92 +4,104 @@ import com.parkinglot.core.*;
 import com.parkinglot.enums.CarType;
 import com.parkinglot.enums.ParkingLots;
 import com.parkinglot.enums.PermitDurations;
-import com.parkinglot.utils.ParkingCharge;
+import com.parkinglot.core.ParkingCharge;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.*;
 
 public class ParkingOffice {
-    private final String name;
-    private final Address address;
-    private final List<Customer> customers = new ArrayList<>();
-    private final List<Car> cars = new ArrayList<>();
-    private List<ParkingLot> parkingLots = new ArrayList<>();
+    private final String parkingOfficeName;
+    private final Address parkingOfficeAddress;
+    private List<ParkingLot> listOfParkingLots  = new ArrayList<>();
     private final List<ParkingCharge> parkingCharges = new ArrayList<>();
+    private final PermitManager permitManager;
+    private final TransactionManager transactionManager;
 
-    public ParkingOffice(String name, Address address) {
-        this.name = name;
-        this.address = address;
+    public ParkingOffice(String parkingOfficeName, Address parkingOfficeAddress) {
+        this(parkingOfficeName, parkingOfficeAddress,
+                new PermitManager(), new TransactionManager());
     }
 
+    public ParkingOffice(String parkingOfficeName, Address parkingOfficeAddress,
+                         PermitManager permitManager,
+                         TransactionManager transactionManager) {
+        this.parkingOfficeName = parkingOfficeName;
+        this.parkingOfficeAddress = parkingOfficeAddress;
+        this.permitManager = permitManager;
+        this.transactionManager = transactionManager;
+    }
+
+    public Car findCar(String permitId, String parkingLotId) {
+        return getCars().stream()
+                .filter(car -> permitId.equals(car.getPermitForLot(parkingLotId).getPermitId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Car not found"));
+    }
+
+    /**
+     * Handle tracking who parked and when
+     * @param dateParked
+     * @param parkingPermit
+     * @param parkingLot
+     * @return ParkingTransaction
+     */
+    public ParkingTransaction park(Calendar dateParked, Permit parkingPermit, ParkingLot parkingLot) {
+        Car permitToCar = findCar(parkingPermit.getPermitId(), parkingLot.getLotId());
+        return transactionManager.park(dateParked, parkingPermit, parkingLot, permitToCar);
+    }
+
+    /**
+     * Register Customer
+     * @param name
+     * @param address
+     * @param phone
+     * @return Customer
+     */
     public Customer register(String name, Address address, String phone) {
-        // Only register if customer doesn't exist in DB yet. Comparing by phone, since names can be dupe
-        Optional<Customer> customerMatch = customers.stream()
-                .filter(c -> Objects.equals(c.getCustomerPhoneNumber(), phone))
-                .findFirst();
-
-        if (customerMatch.isPresent()) {
-            return customerMatch.get();
-        }
-
-        String customerId = generateCustomerId(name);
-        Customer customer = new Customer(customerId, name, address, phone);
-        customers.add(customer);
-        return customer;
+        return permitManager.register(name, address, phone);
     }
 
-    public Car register(Customer customer, String lotId, String license, CarType carType, PermitDurations expiryDate) {
-        Instant expiration = expiryDate
-                .nextOccurrenceStartingNow(LocalDate.now())
-                .end()
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant();
-
-        Optional<Car> carMatch = cars.stream()
-                .filter(c -> Objects.equals(c.getLicense(), license))
-                .findFirst();
-
-        if (carMatch.isPresent()) {
-            Car car = carMatch.get();
-
-            if (car.hasPermitForLot(lotId)) {
-                car.setCurrentLot(lotId);
-                return car;
-            }
-
-            String permitId = generatePermitId(customer.getCustomerId());
-            car.updatePermit(lotId, permitId, expiration);
-            return car;
-        }
-
-        Car car = new Car(license, carType, customer);
-        String permitId = generatePermitId(customer.getCustomerId());
-        car.updatePermit(lotId, permitId, expiration);
-        cars.add(car);
-        return car;
+    /**
+     * Register Car for a permit
+     * @param customer
+     * @param lotId
+     * @param license
+     * @param carType
+     * @param expiryDate
+     * @return Car
+     */
+    public Car register(Customer customer, String lotId, String license,
+                        CarType carType, PermitDurations expiryDate) {
+        return permitManager.register(customer, lotId, license, carType, expiryDate);
     }
 
     // Getters
-    public String getName() {
-        return name;
+    public String getParkingOfficeName() {
+        return parkingOfficeName;
     }
 
     public Address getAddress() {
-        return address;
+        return parkingOfficeAddress;
     }
 
     public List<Customer> getCustomers() {
-        return customers;
+        return permitManager.getCustomers() ;
     }
 
     public List<Car> getCars() {
-        return cars;
+        return permitManager.getCars();
     }
 
     public List<ParkingLot> getParkingLots() {
-        return parkingLots;
+        return listOfParkingLots ;
+    }
+
+    public ParkingLot getParkingLotById(String lotId) {
+        for (ParkingLot lot : listOfParkingLots) {
+            if (lot.getLotId().equals(lotId)) {
+                return lot;
+            }
+        }
+        throw new IllegalArgumentException("No parking lot found with id: " + lotId);
     }
 
     public List<ParkingCharge> getParkingCharges() {
@@ -97,19 +109,20 @@ public class ParkingOffice {
     }
 
     public Collection<String> getCustomerIds() {
-        return customers.stream()
+        return getCustomers().stream()
                 .map(Customer::getCustomerId)
                 .toList();
     }
 
     public Collection<String> getPermitIds() {
-        return cars.stream()
+        return getCars().stream()
                 .flatMap(c -> c.getAllPermitIds().stream())
                 .toList();
     }
+
     public Collection<String> getPermitIds(Customer customer) {
         String cid = customer.getCustomerId();
-        return cars.stream()
+        return getCars().stream()
                 .filter(c -> c.getOwner() != null
                         && cid.equals(c.getOwner().getCustomerId()))
                 .flatMap(c -> c.getAllPermitIds().stream())
@@ -117,7 +130,7 @@ public class ParkingOffice {
     }
 
     public void setParkingLots() {
-        parkingLots = new ArrayList<>(Arrays.stream(ParkingLots.values())
+        listOfParkingLots = new ArrayList<>(Arrays.stream(ParkingLots.values())
                 .map(e -> new ParkingLot(
                         e.getLotId(),
                         e.getAddress(),
@@ -126,7 +139,7 @@ public class ParkingOffice {
     }
 
     public ParkingLot retrieveLotData(String lotId) {
-        return parkingLots.stream()
+        return listOfParkingLots.stream()
                 .filter(l -> l.getLotId().equals(lotId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown lotId: " + lotId));
@@ -135,14 +148,5 @@ public class ParkingOffice {
     public Money addCharge(ParkingCharge parkingCharge) {
         parkingCharges.add(parkingCharge);
         return parkingCharge.getAmount();
-    }
-
-    // Generate a random Customer ID with name Concat
-    private String generateCustomerId(String name) {
-        return UUID.randomUUID().toString() + name.replaceAll("\\s+", "").toLowerCase();
-    }
-
-    private String generatePermitId(String customerId) {
-        return UUID.randomUUID().toString() + customerId.replace("-", "");
     }
 }

@@ -3,12 +3,13 @@ package com.parkinglot.service;
 import com.parkinglot.core.*;
 import com.parkinglot.enums.CarType;
 import com.parkinglot.enums.PermitDurations;
-import com.parkinglot.utils.ParkingCharge;
+import com.parkinglot.core.ParkingCharge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ParkingOfficeIT {
 
         assertEquals(2, parkingLots.size());
         assertEquals(officeAddress, officeData.getAddress());
-        assertEquals("Campus Parking Office", officeData.getName());
+        assertEquals("Campus Parking Office", officeData.getParkingOfficeName());
     }
 
     @Test
@@ -153,5 +154,27 @@ public class ParkingOfficeIT {
                 IllegalArgumentException.class,
                 () -> officeData.retrieveLotData("DOESNTEXIST11")
         );
+    }
+
+    @Test
+    void testFindCar() {
+        Car carFound = officeData.findCar(customerCarData.getPermit(), "PLS-1");
+        assertNotNull(carFound);
+        assertEquals(customerCarData.getPermit(), carFound.getPermit());
+        assertEquals(customerCarData.getPermitExpiration(), carFound.getPermitExpiration());
+        assertEquals(customerCarData.getPermitLot(), carFound.getPermitLot());
+    }
+
+    @Test
+    void testPark() {
+        ParkingLot lotData = officeData.getParkingLotById("PLN-1");
+        Permit lotPermit = customerCarData.getPermitForLot("PLN-1");
+        Money expectedMoney = new Money(1550);
+        ParkingTransaction parkingTransaction = officeData.park(Calendar.getInstance(),
+                lotPermit, lotData);
+        assertNotNull(parkingTransaction);
+        assertEquals(lotPermit, parkingTransaction.getPermit());
+        assertEquals(expectedMoney.getCents(), parkingTransaction.getFeeCharged().getCents());
+        assertEquals(lotData, parkingTransaction.getLot());
     }
 }

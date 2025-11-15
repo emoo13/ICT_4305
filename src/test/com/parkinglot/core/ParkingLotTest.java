@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import com.parkinglot.utils.ParkingCharge;
 import org.mockito.MockedStatic;
 
 import java.time.Instant;

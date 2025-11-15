@@ -6,9 +6,8 @@ import org.junit.jupiter.api.Test;
 import com.parkinglot.enums.CarType;
 import com.parkinglot.enums.PermitDurations;
 import com.parkinglot.service.ParkingOffice;
-import com.parkinglot.utils.ParkingCharge;
+
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -86,7 +85,7 @@ public class ParkingLotIT {
     @Test
     void testLeavingLotNorthCompactTwoOvernight() {
         Instant thisInstance = Instant.now();
-        Instant twoDaysLater = thisInstance.plus(2, ChronoUnit.DAYS);
+        Instant twoDaysLater = thisInstance.plus(3, ChronoUnit.DAYS);
 
         ParkingCharge entryCharge = parkingLotNorth.entry(Instant.now(), customer1Car1Data);
         ParkingCharge exitCharge = parkingLotNorth.exit(twoDaysLater, customer1Car1Data);
